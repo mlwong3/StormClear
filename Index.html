@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>風調雨順 - 災後維修 (模擬)</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 使用 Inter 字體 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        /* 隱藏所有螢幕，預設 */
+        .app-screen {
+            display: none;
+        }
+        /* 顯示當前活動的螢幕 */
+        .app-screen.active {
+            display: flex;
+        }
+        /* 自訂滾動條 */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background-color: #f1f5f9;
+        }
+        /* (更新) 確保地圖容器有高度 */
+        .map-iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
+            overflow: hidden;
+        }
+        .map-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        /* (新增) 任務列表點擊樣式 */
+        .task-row:hover {
+            background-color: #f9fafb;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 p-4 md:p-8 flex items-center justify-center min-h-screen">
+
+    <!-- 手機模擬器外框 -->
+    <div class="w-full max-w-md mx-auto h-[850px] bg-white shadow-2xl rounded-3xl overflow-hidden border-4 border-gray-800 flex flex-col relative">
+
+        <!-- 狀態列 (模擬) -->
+        <div class="bg-white p-2 flex justify-between items-center text-xs text-gray-700 border-b border-gray-200">
+            <span id="current-time">11:05</span>
+            <div class="flex items-center space-x-1">
+                <!-- ... 狀態列 icons ... -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="9" y1="6" x2="15" y2="6"></line></svg>
+            </div>
+        </div>
+
+        <!-- 應用程式內容區域 -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+
+            <!-- ======================================== -->
+            <!-- 1. 登入頁 (Login Screen) - 預設顯示 -->
+            <!-- ======================================== -->
+            <div id="screen-login" class="app-screen active flex-col h-full justify-center items-center p-8 bg-gray-50">
+                <!-- ... 登入頁內容 ... -->
+                <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-blue-600"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800 mt-6 mb-12 text-center">風調雨順 - 災後維修</h1>
+                <button onclick="showScreen('screen-public-home')" class="w-full bg-blue-600 text-white font-semibold py-4 px-6 rounded-lg text-lg shadow-md hover:bg-blue-700 transition duration-200 mb-4">
+                    公眾人士
+                </button>
+                <button onclick="showScreen('screen-gov-login')" class="w-full bg-gray-700 text-white font-semibold py-4 px-6 rounded-lg text-lg shadow-md hover:bg-gray-800 transition duration-200">
+                    政府部門
+                </button>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- 1B. 政府部門登入頁 (Gov Login Screen) -->
+            <!-- ======================================== -->
+            <div id="screen-gov-login" class="app-screen flex-col h-full bg-gray-50">
+                <!-- ... 政府登入頁內容 ... -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b">
+                    <button onclick="showScreen('screen-login')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">政府部門登入</h2>
+                    <div class="w-10"></div>
+                </header>
+                <div class="flex-1 flex flex-col justify-center items-center p-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-700 mb-8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m12 14 4-2"></path><path d="m12 14-4-2"></path><path d="m12 14-4 2"></path><path d="m12 14 4 2"></path><path d="m12 14-4-2"></path></svg>
+                    <div class="w-full space-y-4">
+                        <input type="text" placeholder="帳號" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="password" placeholder="密碼" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button onclick="showScreen('screen-gov-home')" class="w-full bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg text-lg shadow-md hover:bg-gray-800 transition duration-200 mt-4">
+                            登入
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- 2. 公眾人士 - 主頁 (Public Home Screen) -->
+            <!-- ======================================== -->
+            <div id="screen-public-home" class="app-screen flex-col h-full bg-gray-50">
+                <!-- ... 公眾主頁內容 ... -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b">
+                    <button onclick="showScreen('screen-login')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">風調雨順(公眾人士)</h2>
+                    <div class="w-10"></div>
+                </header>
+                <div class="flex-1 p-6 space-y-4">
+                    <button onclick="showScreen('screen-news')" class="w-full bg-white p-6 rounded-lg shadow-md border border-gray-200 flex items-center space-x-4 hover:bg-gray-50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span class="text-xl font-semibold text-gray-700">NEWS 最新消息</span>
+                    </button>
+                    <button onclick="showScreen('screen-map')" class="w-full bg-white p-6 rounded-lg shadow-md border border-gray-200 flex items-center space-x-4 hover:bg-gray-50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path d="M4 15.5A3.5 3.5 0 0 1 7.5 12H12"></path><path d="M14.5 12a3.5 3.5 0 0 1 3.5 3.5V19H14v-1.5a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5V19H8v-1.5A3.5 3.5 0 0 1 11.5 12H12"></path><path d="M14 19v-1.5a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5V19"></path><path d="M18 19v-1.5a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5V19"></path><path d="M22 19v-1.5a.5.5 0 0 0-.5-.5H18"></path><path d="M2 19v-1.5a.5.5 0 0 1 .5-.5H6v2"></path><path d="M7 12V3.5A3.5 3.5 0 0 1 10.5 0H12"></path><path d="M14.5 0a3.5 3.5 0 0 1 3.5 3.5V12"></path></svg>
+                        <span class="text-xl font-semibold text-gray-700">路面情況</span>
+                    </button>
+                    <button onclick="showScreen('screen-report')" class="w-full bg-white p-6 rounded-lg shadow-md border border-gray-200 flex items-center space-x-4 hover:bg-gray-50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+                        <span class="text-xl font-semibold text-gray-700">匯報情況</span>
+                    </button>
+                    <button onclick="showScreen('screen-report-history')" class="w-full bg-white p-6 rounded-lg shadow-md border border-gray-200 flex items-center space-x-4 hover:bg-gray-50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600">
+                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                            <path d="m10 15.5 4 4-4 4"></path>
+                            <path d="m8 11.5 4-4 4 4"></path>
+                        </svg>
+                        <span class="text-xl font-semibold text-gray-700">我的匯報紀錄</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- 3. 最新消息頁 (Latest News Screen) -->
+            <!-- ======================================== -->
+            <div id="screen-news" class="app-screen flex-col h-full bg-gray-100">
+                <!-- ... 最新消息頁內容 ... -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b sticky top-0">
+                    <button onclick="showScreen('screen-public-home')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">最新消息</h2>
+                    <div class="w-10"></div>
+                </header>
+                <div class="flex-1 p-4 space-y-4 overflow-y-auto custom-scrollbar">
+                    <div class="bg-white rounded-lg shadow p-5">
+                        <h3 class="text-xl font-bold text-red-600 mb-2">風暴提示</h3>
+                        <p class="text-sm text-gray-500 mb-3">2025年9月2日 09:20</p>
+                        <p class="text-gray-700 leading-relaxed">超強颱風「山馬」正持續逼近本港, 天文台在今日上午9時20分發出八號東北烈風或暴風信號...</p>
+                        <p class="text-gray-700 leading-relaxed mt-2">天文台提醒市民,「山馬」環流廣闊, 風力強勁...</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-5">
+                        <h3 class="text-xl font-bold text-yellow-600 mb-2">服務暫停安排</h3>
+                        <p class="text-sm text-gray-500 mb-3">2025年9月2日 08:20</p>
+                        <p class="text-gray-700 leading-relaxed">八號熱帶氣旋警告信號現正生效, 以下公共及商業服務已經暫停或作出特別安排:</p>
+                        <ul class="list-disc list-inside text-gray-700 mt-2 space-y-1">
+                            <li>政府服務: 所有日間學校停課...</li>
+                            <li>醫療服務: 醫院管理局轄下所有普通科及專科門診診所...</li>
+                            <li>交通服務: 港鐵地面及高架路段服務已暫停...</li>
+                            <li>金融市場: 證券市場及衍生產品市場全日暫停交易。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-5">
+                        <h3 class="text-xl font-bold text-blue-600 mb-2">政府跟進工作</h3>
+                        <p class="text-sm text-gray-500 mb-3">2025年9月2日 10:30</p>
+                        <p class="text-gray-700 leading-relaxed">因應超強颱風「山馬」來襲, 政府已全面啟動緊急事故監察及支援中心...</p>
+                        <ul class="list-disc list-inside text-gray-700 mt-2 space-y-1">
+                            <li>渠務署: 已派員巡查各區容易水浸的黑點...</li>
+                            <li>路政署: 正加緊清理可能阻塞道路的障礙物...</li>
+                            <li>社會福利署: 各區共開放40個臨時庇護中心...</li>
+                            <li>民政事務總署: 熱線服務持續運作...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- 4. 路面情況頁 (Road Conditions Map Screen) -->
+            <!-- ======================================== -->
+            <div id="screen-map" class="app-screen flex-col h-full bg-gray-100">
+                <!-- 標題欄 -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b sticky top-0 z-10">
+                    <button onclick="showScreen('screen-public-home')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">路面情況</h2>
+                    <div class="w-10"></div>
+                </header>
+                <!-- (更新) 地圖內容 (使用 iframe) -->
+                <div class="flex-1 flex flex-col">
+                    <div class="flex-1 relative bg-gray-300">
+                        <!-- (更新) 地圖容器 (使用 iframe) -->
+                        <div class="map-iframe-container">
+                            <iframe 
+                                class="map-iframe"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14747.88610338779!2d113.9928509420892!3d22.46820129080789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3403f0b26383a375%3A0x83209880ca02b662!2z5aSp5rC05ZyS!5e0!3m2!1szh-TW!2shk!4v1729825598380!5m2!1szh-TW!2shk" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                        
+                        <!-- (REMOVED) 我的位置按鈕 -->
+                    </div>
+                    <!-- 底部 "香港出行易" 資訊欄 -->
+                    <div class="flex-shrink-0 bg-white p-3 border-t-2 border-gray-200 shadow-inner">
+                        <!-- ... 香港出行易內容 ... -->
+                        <h4 class="font-semibold text-gray-700 mb-2">香港出行易 (模擬)</h4>
+                        <div class="flex space-x-2 overflow-x-auto">
+                            <div class="flex-shrink-0 w-40 bg-gray-100 p-2 rounded-lg">
+                                <img src="https://placehold.co/160x90/666/fff?text=AID01215" alt="交通鏡頭" class="rounded mb-1">
+                                <p class="text-xs text-gray-600 truncate">堅拿道天橋近永德大廈-南行</p>
+                            </div>
+                            <div class="flex-shrink-0 w-40 bg-gray-100 p-2 rounded-lg">
+                                <img src="https://placehold.co/160x90/666/fff?text=H904F" alt="交通鏡頭" class="rounded mb-1">
+                                <p class="text-xs text-gray-600 truncate">堅拿道天橋近告士打道</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ======================================== -->
+            <!-- 5. 匯報情況頁 (Report Situation Screen) -->
+            <!-- ======================================== -->
+            <div id="screen-report" class="app-screen flex-col h-full bg-gray-50">
+                <!-- 標題欄 -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b">
+                    <button onclick="showScreen('screen-public-home')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">匯報情況</h2>
+                    <div class="w-10"></div>
+                </header>
+                <!-- 內容 -->
+                <div class="flex-1 p-8 flex flex-col space-y-4">
+                    <input type="file" id="photo-upload" accept="image/*" capture="environment" class="hidden" onchange="previewPhoto(event)">
+                    
+                    <div id="photo-preview" class="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 border-2 border-dashed border-gray-300">
+                        (相片預覽)
+                    </div>
+
+                    <button onclick="document.getElementById('photo-upload').click()" class="w-full bg-blue-100 text-blue-700 font-semibold py-4 px-6 rounded-lg text-lg border border-blue-300 hover:bg-blue-200 transition">
+                        按此拍攝相片
+                    </button>
+                    
+                    <!-- (新增) 問題類型下拉選單 -->
+                    <div>
+                        <label for="report-problem-type" class="block text-sm font-medium text-gray-700 mb-1">問題類型:</label>
+                        <select id="report-problem-type" class="w-full p-3 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="tree-fall">樹木倒塌</option>
+                            <option value="flooding">嚴重水浸</option>
+                            <option value_name="lamp-damage">燈柱損壞</option>
+                            <option value="debris">路面雜物</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    
+                    <textarea id="report-textarea" class="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="輸入資料 (例如：燈柱倒塌)"></textarea>
+
+                    <!-- (REMOVED) GPS 位置顯示 -->
+                    
+                    <button onclick="submitReport()" class="w-full bg-green-600 text-white font-bold py-4 px-6 rounded-lg text-lg shadow-md hover:bg-green-700 transition duration-200">
+                        匯報
+                    </button>
+                </div>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- (新增) 匯報成功頁 (Report Success Screen) -->
+            <!-- ======================================== -->
+            <div id="screen-report-success" class="app-screen flex-col h-full justify-center items-center p-8 bg-green-50">
+                <!-- ... 匯報成功內容 ... -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <h2 class="text-3xl font-bold text-green-700 mt-6">匯報成功</h2>
+                <p class="text-gray-600 text-lg mt-2">感謝您的回報！</p>
+                <p class="text-gray-500 text-sm mt-4">正在返回主頁...</p>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- (新增) 我的匯報紀錄頁 (Report History Screen) -->
+            <!-- ======================================== -->
+            <div id="screen-report-history" class="app-screen flex-col h-full bg-gray-100">
+                <!-- 標題欄 -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b sticky top-0">
+                    <button onclick="showScreen('screen-public-home')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">我的匯報紀錄</h2>
+                    <div class="w-10"></div>
+                </header>
+                <!-- 內容 (可滾動) -->
+                <div id="report-history-list" class="flex-1 p-4 space-y-4 overflow-y-auto custom-scrollbar">
+                    <!-- 匯報紀錄將由 JavaScript 動態生成 -->
+                </div>
+            </div>
+
+
+            <!-- ======================================== -->
+            <!-- 6. 政府部門 - 主頁 (Government Home) -->
+            <!-- ======================================== -->
+            <div id="screen-gov-home" class="app-screen flex-col h-full bg-gray-50">
+                <!-- ... 政府主頁內容 ... -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b">
+                    <button onclick="showScreen('screen-gov-login')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">風調雨順(政府部門)</h2>
+                    <div class="w-10"></div>
+                </header>
+                <div class="flex-1 p-6 space-y-4">
+                    <button onclick="showScreen('screen-gov-task')" class="w-full bg-white p-6 rounded-lg shadow-md border border-gray-200 flex items-center space-x-4 hover:bg-gray-50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        <span class="text-xl font-semibold text-gray-700">跟進工作</span>
+                    </button>
+                    <button onclick="showScreen('screen-gov-photos')" class="w-full bg-white p-6 rounded-lg shadow-md border border-gray-200 flex items-center space-x-4 hover:bg-gray-50 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <span class="text-xl font-semibold text-gray-700">巡邏相片</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- 7. 政府部門 - 跟進工作/路面情況 (Gov Task) -->
+            <!-- ======================================== -->
+            <div id="screen-gov-task" class="app-screen flex-col h-full bg-gray-100">
+                <!-- 標題欄 -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b sticky top-0 z-10">
+                    <button onclick="showScreen('screen-gov-home')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">路面情況</h2>
+                    <div class="w-10"></div>
+                </header>
+                <!-- 內容 -->
+                <div class="flex-1 flex flex-col">
+                    <!-- (更新) 地圖容器 (使用 iframe) -->
+                    <div class="h-64 relative bg-gray-300 flex-shrink-0">
+                        <div class="map-iframe-container">
+                            <iframe 
+                                class="map-iframe"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d236184.28886867748!2d113.9168019672615!3d22.35269399436441!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3403f0b26383a375%3A0x83209880ca02b662!2z6aaZ5riv!5e0!3m2!1szh-TW!2shk!4v1729825707483!5m2!1szh-TW!2shk" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                        <!-- (REMOVED) 我的位置按鈕 -->
+                    </div>
+                    
+                    <!-- (更新) 部門下拉選單 -->
+                    <div class="p-3 bg-white border-b">
+                        <label for="dept-select" class="block text-sm font-medium text-gray-700 mb-1">選擇部門:</label>
+                        <select id="dept-select" onchange="updateGovTaskList()" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="all">所有部門</option>
+                            <option value="dsd">渠務署</option>
+                            <option value="lcsd">康樂及文化事務署</option>
+                            <option value="fehd">食物環境衛生署</option>
+                            <option value="wsd">水務署</option>
+                            <option value="cedd">土木工程拓展署</option>
+                            <option value="hyd">路政署</option>
+                            <option value="td">運輸署</option>
+                        </select>
+                    </div>
+
+                    <!-- 問題列表 (可滾動) -->
+                    <div class="flex-1 overflow-y-auto custom-scrollbar p-2">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-200 sticky top-0">
+                                <tr>
+                                    <th class="p-2">時間</th>
+                                    <th class="p-2">地點</th>
+                                    <th class="p-2">情況</th>
+                                    <th class="p-2">狀態</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gov-task-list-body" class="bg-white">
+                                <!-- 內容將由 JavaScript 動態生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- 8. 政府部門 - 巡邏相片 (Gov Patrol Photos) -->
+            <!-- ======================================== -->
+            <div id="screen-gov-photos" class="app-screen flex-col h-full bg-gray-100">
+                <!-- ... 巡邏相片內容 ... -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b sticky top-0">
+                    <button onclick="showScreen('screen-gov-home')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">巡邏相片</h2>
+                    <div class="w-10"></div>
+                </header>
+                <div class="flex-1 p-4 overflow-y-auto custom-scrollbar">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-2 rounded-lg shadow">
+                            <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+1" alt="巡邏相片" class="rounded mb-2">
+                            <p class="text-xs text-gray-600">地點: 黃大仙龍翔道</p><p class="text-xs text-gray-500">時間: 3/9 13:58</p><p class="text-sm font-medium text-red-600">分析: 嚴重水浸</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg shadow">
+                            <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+2" alt="巡邏相片" class="rounded mb-2">
+                            <p class="text-xs text-gray-600">地點: 淺水灣道</p><p class="text-xs text-gray-500">時間: 3/9 12:35</p><p class="text-sm font-medium text-yellow-600">分析: 山泥傾瀉</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg shadow">
+                            <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+3" alt="巡邏相片" class="rounded mb-2">
+                            <p class="text-xs text-gray-600">地點: 元朗青山公路</p><p class="text-xs text-gray-500">時間: 3/9 09:12</p><p class="text-sm font-medium text-red-600">分析: 樹木倒塌</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg shadow">
+                            <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+4" alt="巡邏相片" class="rounded mb-2">
+                            <p class="text-xs text-gray-600">地點: 天水圍天耀路</p><p class="text-xs text-gray-500">時間: 3/9 08:28</p><p class="text-sm font-medium text-yellow-600">分析: 燈柱歪斜</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg shadow">
+                            <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+5" alt="巡邏相片" class="rounded mb-2">
+                            <p class="text-xs text-gray-600">地點: 大埔寶鄉街</p><p class="text-xs text-gray-500">時間: 3/9 09:22</p><p class="text-sm font-medium text-green-600">分析: 渠口堵塞</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- (新增) 9. 政府部門 - 問題詳細頁 (Gov Task Details) -->
+            <!-- ======================================== -->
+            <div id="screen-gov-task-details" class="app-screen flex-col h-full bg-gray-100">
+                <!-- 標題欄 -->
+                <header class="flex-shrink-0 bg-white p-4 flex items-center border-b sticky top-0 z-10">
+                    <button onclick="showScreen('screen-gov-task')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">問題詳情</h2>
+                    <div class="w-10"></div>
+                </header>
+                <!-- 內容 (可滾動) -->
+                <div class="flex-1 p-4 space-y-4 overflow-y-auto custom-scrollbar">
+                    <h3 id="detail-title" class="text-2xl font-bold text-gray-800">...</h3>
+                    
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h4 class="text-lg font-semibold mb-2">無人機巡邏相片</h4>
+                        <img id="detail-drone-photo" src="https://placehold.co/400x250/666/fff?text=Drone+Photo" alt="無人機相片" class="rounded-lg w-full">
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h4 class="text-lg font-semibold mb-2">詳細資料</h4>
+                        <div class="space-y-2">
+                            <div>
+                                <span class="font-medium text-gray-600">目前狀態:</span>
+                                <span id="detail-status" class="font-bold text-lg ml-2">...</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-600">負責部門:</span>
+                                <span id="detail-dept" class="ml-2">...</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-600">經緯度:</span>
+                                <span id="detail-coords" class="ml-2 text-sm">...</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-600">時間:</span>
+                                <span id="detail-time" class="ml-2">...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模擬公眾匯報相片 (可選) -->
+                    <div id="detail-public-report-section" class="bg-white rounded-lg shadow p-4 hidden">
+                        <h4 class="text-lg font-semibold mb-2">公眾匯報相片</h4>
+                        <img id="detail-public-photo" src="https://placehold.co/400x250/ccc/fff?text=Public+Photo" alt="公眾匯報相片" class="rounded-lg w-full">
+                    </div>
+                    
+                    <div class="space-y-3 pt-4">
+                        <button onclick="updateTaskStatus('處理中')" class="w-full bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-md hover:bg-yellow-600 transition">
+                            標記為「處理中」
+                        </button>
+                        <button onclick="updateTaskStatus('已完成')" class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-md hover:bg-green-700 transition">
+                            標記為「已完成」
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- (REMOVED) 全局通知 -->
+
+    </div>
+
+    <!-- (REMOVED) Google Maps API Script -->
+
+    <script>
+        // 頁面導航邏輯
+        let currentScreen = 'screen-login';
+        
+        // (REMOVED) 地圖和 GPS 相關變數
+        let myReports = []; // 儲存公眾匯報
+        let allTasks = {}; // 儲存所有任務以便按 ID 查找
+        let currentViewingTaskId = null; // 儲存正在查看的任務 ID
+        
+        // (REMOVED) 部門圖釘顏色
+
+        // (更新) 政府部門任務數據 (保留)
+        const departmentTasks = {
+            'dsd': [
+                { id: 'dsd-01', time: '3/9 09:25', location: '大埔寶鄉街', situation: '渠口堵塞', priority: '!', coords: {lat: 22.4503, lng: 114.1622}, status: '待處理', dronePhoto: 'https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+5', publicPhoto: null, dept: '渠務署' }
+            ],
+            'wsd': [
+                { id: 'wsd-01', time: '3/9 14:00', location: '黃大仙區龍翔道', situation: '嚴重水浸', priority: '!!!', coords: {lat: 22.3364, lng: 114.1866}, status: '待處理', dronePhoto: 'https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+1', publicPhoto: null, dept: '水務署' }
+            ],
+            'cedd': [
+                { id: 'cedd-01', time: '3/9 12:40', location: '淺水灣道', situation: '山泥傾瀉', priority: '!!', coords: {lat: 22.2474, lng: 114.1953}, status: '處理中', dronePhoto: 'https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+2', publicPhoto: null, dept: '土木工程拓展署' }
+            ],
+            'td': [
+                { id: 'td-01', time: '3/9 09:15', location: '元朗青山公路', situation: '樹木倒塌', priority: '!!!', coords: {lat: 22.4438, lng: 114.0292}, status: '待處理', dronePhoto: 'https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+3', publicPhoto: 'https://placehold.co/400x250/ccc/fff?text=Public+Photo+1', dept: '運輸署' }
+            ],
+            'hyd': [
+                { id: 'hyd-01', time: '3/9 08:30', location: '天水圍天耀路', situation: '燈柱歪斜', priority: '!!', coords: {lat: 22.4453, lng: 114.0049}, status: '已完成', dronePhoto: 'https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+4', publicPhoto: null, dept: '路政署' }
+            ],
+            'lcsd': [],
+            'fehd': []
+        };
+
+
+        function showScreen(screenId) {
+            // ... (隱藏舊螢幕)
+            const oldScreen = document.getElementById(currentScreen);
+            if (oldScreen) oldScreen.classList.remove('active');
+            
+            // 顯示新螢幕
+            const newScreen = document.getElementById(screenId);
+            if (newScreen) {
+                newScreen.classList.add('active');
+                currentScreen = screenId;
+
+                // (REMOVED) 地圖相關邏輯
+
+                // (更新) 頁面特定邏輯
+                if (screenId === 'screen-gov-task') {
+                    updateGovTaskList(); // 每次返回都刷新列表
+                }
+                if (screenId === 'screen-report') {
+                    // (REMOVED) GPS 邏輯
+                }
+                if (screenId === 'screen-report-history') {
+                    updateReportHistory();
+                }
+            } else {
+                console.error("Screen not found:", screenId);
+            }
+        }
+
+        // (REMOVED) showNotification function
+
+        // 更新模擬時間
+        function updateTime() {
+            // ... (時間邏輯)
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('current-time').textContent = `${hours}:${minutes}`;
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // 預覽相片
+        function previewPhoto(event) {
+            // ... (預覽相片邏輯)
+            const preview = document.getElementById('photo-preview');
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="相片預覽" class="w-full h-full object-cover rounded-lg">`;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '(相片預覽)';
+            }
+        }
+
+        // (REMOVED) getReportLocation function
+
+        // (更新) 提交匯報功能
+        function submitReport() {
+            const photoPreview = document.getElementById('photo-preview');
+            const photoSrc = photoPreview.querySelector('img') ? photoPreview.querySelector('img').src : 'https://placehold.co/200x200/ccc/fff?text=No+Photo';
+            const problemTypeSelect = document.getElementById('report-problem-type');
+            const problemType = problemTypeSelect.options[problemTypeSelect.selectedIndex].text;
+            const description = document.getElementById('report-textarea').value || '(沒有描述)';
+            
+            // (更新) 將匯報儲存到 myReports 陣列 (無 GPS)
+            myReports.push({
+                photo: photoSrc,
+                type: problemType,
+                description: description,
+                coords: 'N/A', // (REMOVED) GPS
+                status: '待處理'
+            });
+
+            // 清空表單
+            document.getElementById('report-textarea').value = '';
+            photoPreview.innerHTML = '(相片預覽)';
+            document.getElementById('photo-upload').value = null;
+            // (REMOVED) GPS 狀態
+            
+            // 顯示成功畫面
+            showScreen('screen-report-success');
+
+            // 2秒後返回主頁
+            setTimeout(() => {
+                showScreen('screen-public-home');
+            }, 2000);
+        }
+        
+        // (新增) 更新「我的匯報紀錄」頁面
+        function updateReportHistory() {
+            const listDiv = document.getElementById('report-history-list');
+            listDiv.innerHTML = ''; // 清空列表
+
+            if (myReports.length === 0) {
+                listDiv.innerHTML = `<p class="text-center text-gray-500 mt-8">您尚未提交任何匯報。</p>`;
+                return;
+            }
+
+            // (倒序顯示)
+            [...myReports].reverse().forEach(report => {
+                let statusClass = 'text-yellow-600 bg-yellow-100';
+                if (report.status === '處理中') statusClass = 'text-blue-600 bg-blue-100';
+                if (report.status === '已完成') statusClass = 'text-green-600 bg-green-100';
+
+                const cardHTML = `
+                    <div class="bg-white rounded-lg shadow p-4 flex items-center space-x-4">
+                        <img src="${report.photo}" alt="匯報相片" class="w-20 h-20 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800">${report.type}</h3>
+                            <p class="text-sm text-gray-600">位置: ${report.coords}</p>
+                            <p class="text-sm text-gray-500 truncate">描述: ${report.description}</p>
+                        </div>
+                        <span class="text-sm font-medium ${statusClass} px-3 py-1 rounded-full">${report.status}</span>
+                    </div>
+                `;
+                listDiv.innerHTML += cardHTML;
+            });
+        }
+
+        // (REMOVED) initMaps function
+        
+        // (新增) 扁平化任務數據
+        function flattenTasks() {
+            allTasks = {};
+            Object.keys(departmentTasks).forEach(deptKey => {
+                departmentTasks[deptKey].forEach(task => {
+                    allTasks[task.id] = task;
+                });
+            });
+        }
+
+        // (更新) 更新政府任務列表的函數
+        function updateGovTaskList() {
+            // (REMOVED) 地圖檢查
+
+            const selectedDept = document.getElementById('dept-select').value;
+            const taskListBody = document.getElementById('gov-task-list-body');
+            taskListBody.innerHTML = '';
+            
+            let tasksToShow = [];
+
+            // (更新) 決定顯示哪些任務
+            if (selectedDept === 'all') {
+                Object.keys(departmentTasks).forEach(deptKey => {
+                    tasksToShow = tasksToShow.concat(departmentTasks[deptKey]);
+                });
+            } else if (departmentTasks[selectedDept]) {
+                tasksToShow = departmentTasks[selectedDept];
+            }
+
+            if (tasksToShow.length > 0) {
+                tasksToShow.forEach(task => {
+                    // (更新) 根據狀態決定樣式
+                    let statusText = task.status;
+                    let statusClass = 'text-yellow-600';
+                    if (task.status === '處理中') statusClass = 'text-blue-600';
+                    if (task.status === '已完成') statusClass = 'text-green-600';
+
+                    // 1. 加入任務到列表 (新增 onclick)
+                    const row = `
+                        <tr class="task-row border-b" onclick="showTaskDetails('${task.id}')">
+                            <td class="p-2">${task.time}</td>
+                            <td class="p-2">${task.location}</td>
+                            <td class="p-2">${task.situation}</td>
+                            <td class="p-2"><span class="${statusClass} font-semibold">${statusText}</span></td>
+                        </tr>
+                    `;
+                    taskListBody.innerHTML += row;
+
+                    // (REMOVED) 地圖圖釘邏輯
+                });
+
+                // (REMOVED) 地圖縮放邏輯
+
+            } else {
+                // 如果沒有任務
+                taskListBody.innerHTML = `<tr class="border-b"><td class="p-4 text-center text-gray-500" colspan="4">此部門目前沒有待處理任務</td></tr>`;
+                // (REMOVED) 地圖重設邏輯
+            }
+        }
+        
+        // (新增) 顯示任務詳情頁
+        function showTaskDetails(taskId) {
+            currentViewingTaskId = taskId;
+            const task = allTasks[taskId];
+            if (!task) return;
+
+            // 填充數據
+            document.getElementById('detail-title').innerText = `${task.situation} (${task.location})`;
+            document.getElementById('detail-drone-photo').src = task.dronePhoto;
+            
+            // 狀態
+            let statusText = task.status;
+            let statusClass = 'text-yellow-600';
+            if (task.status === '處理中') { statusClass = 'text-blue-600'; }
+            if (task.status === '已完成') { statusClass = 'text-green-600'; }
+            const statusEl = document.getElementById('detail-status');
+            statusEl.innerText = statusText;
+            statusEl.className = `font-bold text-lg ml-2 ${statusClass}`;
+            
+            document.getElementById('detail-dept').innerText = task.dept;
+            document.getElementById('detail-coords').innerText = `${task.coords.lat}, ${task.coords.lng}`;
+            document.getElementById('detail-time').innerText = task.time;
+
+            // 公眾匯報相片
+            const publicSection = document.getElementById('detail-public-report-section');
+            if (task.publicPhoto) {
+                document.getElementById('detail-public-photo').src = task.publicPhoto;
+                publicSection.classList.remove('hidden');
+            } else {
+                publicSection.classList.add('hidden');
+            }
+            
+            // (REMOVED) 地圖連動
+            
+            showScreen('screen-gov-task-details');
+        }
+        
+        // (REMOVED) focusOnTask function
+        
+        // (新增) 更新任務狀態
+        function updateTaskStatus(newStatus) {
+            if (!currentViewingTaskId) return;
+            
+            const task = allTasks[currentViewingTaskId];
+            task.status = newStatus;
+            
+            // 更新詳細頁上的狀態
+            let statusText = task.status;
+            let statusClass = 'text-yellow-600';
+            if (task.status === '處理中') { statusClass = 'text-blue-600'; }
+            if (task.status === '已完成') { statusClass = 'text-green-600'; }
+            const statusEl = document.getElementById('detail-status');
+            statusEl.innerText = statusText;
+            statusEl.className = `font-bold text-lg ml-2 ${statusClass}`;
+            
+            console.log(`Task ${task.id} status updated to ${newStatus}`);
+            
+            showScreen('screen-gov-task');
+        }
+
+        // (REMOVED) goToMyLocation function
+
+        // 初始化：確保只有登入頁顯示
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.app-screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('screen-login').classList.add('active');
+            
+            // (新增) 在 DOM 載入時扁平化任務
+            flattenTasks();
+            // (新增) 在 DOM 載入時更新一次任務列表 (為預設的 "all" 準備)
+            updateGovTaskList();
+        });
+    </script>
+</body>
+</html>
+
