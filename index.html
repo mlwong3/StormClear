@@ -62,7 +62,8 @@
 <body class="bg-gray-800 p-4 md:p-8 flex items-center justify-center min-h-screen">
 
     <!-- 手機模擬器外框 -->
-    <div class="w-full max-w-md mx-auto h-[850px] bg-white shadow-2xl rounded-3xl overflow-hidden border-4 border-gray-900 flex flex-col relative">
+    <!-- (更新) 高度從 850px 改為 700px 以縮短頁面大小 -->
+    <div class="w-full max-w-md mx-auto h-[700px] bg-white shadow-2xl rounded-3xl overflow-hidden border-4 border-gray-900 flex flex-col relative">
 
         <!-- 頂部空間 -->
         <div class="bg-white h-6 w-full flex-shrink-0"></div>
@@ -188,10 +189,12 @@
                         <h4 class="font-semibold text-gray-700 mb-2">香港出行易 (模擬)</h4>
                         <div class="flex space-x-2 overflow-x-auto">
                             <div class="flex-shrink-0 w-40 bg-gray-100 p-2 rounded-lg">
+                                <!-- 修改此處: 更換圖片連結 -->
                                 <img src="https://placehold.co/160x90/666/fff?text=AID01215" alt="交通鏡頭" class="rounded mb-1">
                                 <p class="text-xs text-gray-600 truncate">堅拿道天橋近永德大廈-南行</p>
                             </div>
                             <div class="flex-shrink-0 w-40 bg-gray-100 p-2 rounded-lg">
+                                <!-- 修改此處: 更換圖片連結 -->
                                 <img src="https://placehold.co/160x90/666/fff?text=H904F" alt="交通鏡頭" class="rounded mb-1">
                                 <p class="text-xs text-gray-600 truncate">堅拿道天橋近告士打道</p>
                             </div>
@@ -449,22 +452,27 @@
                 <div class="flex-1 p-4 overflow-y-auto custom-scrollbar">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-white p-2 rounded-lg shadow">
+                            <!-- 修改此處: 更換圖片連結 -->
                             <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+1" alt="巡邏相片" class="rounded mb-2">
                             <p class="text-xs text-gray-600">地點: 黃大仙龍翔道</p><p class="text-xs text-gray-500">時間: 3/9 13:58</p><p class="text-sm font-medium text-red-600">分析: 嚴重水浸</p>
                         </div>
                         <div class="bg-white p-2 rounded-lg shadow">
+                            <!-- 修改此處: 更換圖片連結 -->
                             <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+2" alt="巡邏相片" class="rounded mb-2">
                             <p class="text-xs text-gray-600">地點: 淺水灣道</p><p class="text-xs text-gray-500">時間: 3/9 12:35</p><p class="text-sm font-medium text-yellow-600">分析: 山泥傾瀉</p>
                         </div>
                          <div class="bg-white p-2 rounded-lg shadow">
+                            <!-- 修改此處: 更換圖片連結 -->
                             <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+3" alt="巡邏相片" class="rounded mb-2">
                             <p class="text-xs text-gray-600">地點: 元朗青山公路</p><p class="text-xs text-gray-500">時間: 3/9 09:12</p><p class="text-sm font-medium text-red-600">分析: 樹木倒塌</p>
                         </div>
                          <div class="bg-white p-2 rounded-lg shadow">
+                            <!-- 修改此處: 更換圖片連結 -->
                             <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+4" alt="巡邏相片" class="rounded mb-2">
                             <p class="text-xs text-gray-600">地點: 天水圍天耀路</p><p class="text-xs text-gray-500">時間: 3/9 08:28</p><p class="text-sm font-medium text-yellow-600">分析: 燈柱歪斜</p>
                         </div>
                          <div class="bg-white p-2 rounded-lg shadow">
+                            <!-- 修改此處: 更換圖片連結 -->
                             <img src="https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+5" alt="巡邏相片" class="rounded mb-2">
                             <p class="text-xs text-gray-600">地點: 大埔寶鄉街</p><p class="text-xs text-gray-500">時間: 3/9 09:22</p><p class="text-sm font-medium text-green-600">分析: 渠口堵塞</p>
                         </div>
@@ -486,6 +494,7 @@
                     
                     <div class="bg-white rounded-lg shadow p-4">
                         <h4 class="text-lg font-semibold mb-2">無人機巡邏相片</h4>
+                        <!-- 修改此處: 更換圖片連結 -->
                         <img id="detail-drone-photo" src="https://placehold.co/400x250/666/fff?text=Drone+Photo" alt="無人機相片" class="rounded-lg w-full">
                     </div>
                     
@@ -509,6 +518,7 @@
 
                     <div id="detail-public-report-section" class="bg-white rounded-lg shadow p-4 hidden">
                         <h4 class="text-lg font-semibold mb-2">公眾匯報相片</h4>
+                        <!-- 修改此處: 更換圖片連結 -->
                         <img id="detail-public-photo" src="https://placehold.co/400x250/ccc/fff?text=Public+Photo" alt="公眾匯報相片" class="rounded-lg w-full">
                     </div>
                     
@@ -533,6 +543,7 @@
         // 數據變數
         let myReports = []; // 儲存公眾匯報
         // 預設一些市民匯報數據以供展示
+        // 修改此處: 可將 'photo' 屬性改為您的本地圖片路徑
         let citizenReports = [
             {
                 photo: 'https://placehold.co/200x200/e5e7eb/1f2937?text=Tree',
@@ -564,6 +575,7 @@
             "新界": ["葵青區", "荃灣區", "屯門區", "元朗區", "北區", "大埔區", "沙田區", "西貢區", "離島區"]
         };
 
+        // 修改此處: dronePhoto 屬性可改為您的圖片連結
         const departmentTasks = {
             'dsd': [
                 { id: 'dsd-01', time: '3/9 09:25', location: '大埔寶鄉街', situation: '渠口堵塞', priority: '!', status: '待處理', dronePhoto: 'https://placehold.co/300x200/94a3b8/fff?text=Drone+Photo+5', publicPhoto: null, dept: '渠務署' }
