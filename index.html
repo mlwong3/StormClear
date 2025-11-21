@@ -57,6 +57,14 @@
             border-color: #3b82f6; /* blue-500 */
             border-width: 2px;
         }
+        /* 新聞卡片點擊樣式 */
+        .news-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .news-card:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body class="bg-gray-800 p-4 md:p-8 flex items-center justify-center min-h-screen">
@@ -143,7 +151,7 @@
             </div>
 
             <!-- ======================================== -->
-            <!-- 3. 最新消息頁 -->
+            <!-- 3. 最新消息頁 (新聞列表) -->
             <!-- ======================================== -->
             <div id="screen-news" class="app-screen flex-col h-full bg-gray-100">
                  <header class="flex-shrink-0 bg-white p-4 flex items-center border-b sticky top-0">
@@ -152,20 +160,44 @@
                     <div class="w-10"></div>
                 </header>
                 <div class="flex-1 p-4 space-y-4 overflow-y-auto custom-scrollbar">
-                    <div class="bg-white rounded-lg shadow p-5">
+                    <!-- 卡片 1: 風暴提示 -->
+                    <div onclick="showNewsDetail('storm')" class="news-card bg-white rounded-lg shadow p-5 hover:bg-gray-50">
                         <h3 class="text-xl font-bold text-red-600 mb-2">風暴提示</h3>
-                        <p class="text-sm text-gray-500 mb-3">2025年9月2日 09:20</p>
-                        <p class="text-gray-700 leading-relaxed">超強颱風「山馬」正持續逼近本港...</p>
+                        <p class="text-sm text-gray-500 mb-3">2025年9月2日 09:40</p>
+                        <p class="text-gray-700 leading-relaxed line-clamp-3">超強颱風「山馬」正持續逼近本港，天文台在今日上午9時40分發出八號東北烈風或暴風信號...</p>
+                        <p class="text-blue-600 text-sm mt-2 font-medium text-right">點擊查看更多 ></p>
                     </div>
-                    <div class="bg-white rounded-lg shadow p-5">
+                    <!-- 卡片 2: 服務暫停安排 -->
+                    <div onclick="showNewsDetail('suspension')" class="news-card bg-white rounded-lg shadow p-5 hover:bg-gray-50">
                         <h3 class="text-xl font-bold text-yellow-600 mb-2">服務暫停安排</h3>
-                        <p class="text-sm text-gray-500 mb-3">2025年9月2日 08:20</p>
-                        <p class="text-gray-700 leading-relaxed">八號熱帶氣旋警告信號現正生效...</p>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-5">
-                        <h3 class="text-xl font-bold text-blue-600 mb-2">政府跟進工作</h3>
                         <p class="text-sm text-gray-500 mb-3">2025年9月2日 10:30</p>
-                        <p class="text-gray-700 leading-relaxed">因應超強颱風「山馬」來襲...</p>
+                        <p class="text-gray-700 leading-relaxed line-clamp-3">因應超強颱風「山馬」來襲，政府已全面啟動緊急事故監察及支援中心...</p>
+                        <p class="text-blue-600 text-sm mt-2 font-medium text-right">點擊查看更多 ></p>
+                    </div>
+                    <!-- 卡片 3: 政府跟進工作 -->
+                    <div onclick="showNewsDetail('government')" class="news-card bg-white rounded-lg shadow p-5 hover:bg-gray-50">
+                        <h3 class="text-xl font-bold text-blue-600 mb-2">政府跟進工作</h3>
+                        <p class="text-sm text-gray-500 mb-3">2025年9月2日 08:20</p>
+                        <p class="text-gray-700 leading-relaxed line-clamp-3">八號熱帶氣旋警告信號現正生效，以下公共及商業服務已經暫停或作出特別安排...</p>
+                        <p class="text-blue-600 text-sm mt-2 font-medium text-right">點擊查看更多 ></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================== -->
+            <!-- (新增) 3B. 新聞詳情頁 -->
+            <!-- ======================================== -->
+            <div id="screen-news-detail" class="app-screen flex-col h-full bg-white">
+                 <header class="flex-shrink-0 bg-white p-4 flex items-center border-b sticky top-0 z-10 shadow-sm">
+                    <button onclick="showScreen('screen-news')" class="p-2 text-blue-600 w-10"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <h2 class="flex-1 text-center text-lg font-semibold text-gray-800">消息詳情</h2>
+                    <div class="w-10"></div>
+                </header>
+                <div class="flex-1 p-6 overflow-y-auto custom-scrollbar">
+                    <h2 id="news-detail-title" class="text-2xl font-bold text-gray-900 mb-2"></h2>
+                    <p id="news-detail-time" class="text-sm text-gray-500 mb-6 border-b pb-4"></p>
+                    <div id="news-detail-content" class="text-gray-700 leading-relaxed text-lg space-y-4">
+                        <!-- 動態內容 -->
                     </div>
                 </div>
             </div>
@@ -452,20 +484,19 @@
                 <div class="flex-1 p-4 overflow-y-auto custom-scrollbar">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-white p-2 rounded-lg shadow">
-                            <!-- 修改此處: 更換圖片連結 -->
+                          <!-- 修改此處: 更換圖片連結 -->
                             <img src="Demo2.png" alt="巡邏相片" class="rounded mb-2">
                             <p class="text-xs text-gray-600">地點: 馬鞍山郊野公園</p><p class="text-xs text-gray-500">時間: 3/9 13:58</p><p class="text-sm font-medium text-red-600">分析: 樹木倒塌</p>
                         </div>
                         <div class="bg-white p-2 rounded-lg shadow">
-                            <!-- 修改此處: 更換圖片連結 -->
+                        <!-- 修改此處: 更換圖片連結 -->
                             <img src="Demo3.png" alt="巡邏相片" class="rounded mb-2">
                             <p class="text-xs text-gray-600">地點: 城門郊野公園</p><p class="text-xs text-gray-500">時間: 3/9 12:35</p><p class="text-sm font-medium text-yellow-600">分析: 燈柱歪斜</p>
                         </div>
-                         <div class="bg-white p-2 rounded-lg shadow">
-                            <!-- 修改此處: 更換圖片連結 -->
+                        <div class="bg-white p-2 rounded-lg shadow">
+                        <!-- 修改此處: 更換圖片連結 -->
                             <img src="Demo1.png" alt="巡邏相片" class="rounded mb-2">
-                            <p class="text-xs text-gray-600">地點: 馬鞍山郊野公園</p><p class="text-xs text-gray-500">時間: 3/9 09:12</p><p class="text-sm font-medium text-red-600">分析: 燈柱歪斜</p>
-                        </div>
+                                <p class="text-xs text-gray-600">地點: 馬鞍山郊野公園</p><p class="text-xs text-gray-500">時間: 3/9 09:12</p><p class="text-sm font-medium text-red-600">分析: 燈柱歪斜</p>
                         </div>
                     </div>
                 </div>
@@ -552,9 +583,57 @@
                 region: '新界',
                 district: '沙田區',
                 status: '待處理',
-                time: '19:45'
+                time: '10:45'
             }
         ];
+        
+        // (新增) 新聞詳情數據庫
+        const newsData = {
+            'storm': {
+                title: '風暴提示',
+                time: '2025年9月2日 09:40',
+                content: `
+                    <p class="mb-4">超強颱風「山馬」正持續逼近本港，天文台在今日上午9時40分發出八號東北烈風或暴風信號。天文台表示，按照現時預測路徑，「山馬」的烈風區會在今明兩日持續影響本港，八號信號在今日日間大部分時間需要維持，預計至少會維持至明日（10月30日）中午12時。</p>
+                    <p>天文台提醒市民，「山馬」環流廣闊，風力強勁，市民應留在室內安全地方，遠離岸邊及低窪地區，並完成所有防風防水浸措施。</p>
+                `
+            },
+            'suspension': {
+                title: '服務暫停安排', // 根據要求內容對應此標題
+                time: '2025年9月2日 10:30',
+                content: `
+                    <p class="mb-4">因應超強颱風「山馬」來襲，政府已全面啟動緊急事故監察及支援中心。政務司司長主持跨部門會議，統籌各部門的應對工作。</p>
+                    <p class="font-bold mb-2">目前主要跟進工作包括：</p>
+                    <ul class="list-disc pl-5 space-y-2 mb-4">
+                        <li><span class="font-bold">渠務署：</span> 已派員巡查各區容易水浸的黑點，確保排水系統暢通。</li>
+                        <li><span class="font-bold">路政署：</span> 正加緊清理可能阻塞道路的障礙物，並待風力減弱後立即處理塌樹報告。</li>
+                        <li><span class="font-bold">社會福利署：</span> 各區共開放40個臨時庇護中心，供有需要的市民暫住。</li>
+                        <li><span class="font-bold">民政事務總署：</span> 熱線服務持續運作，為市民提供支援。</li>
+                    </ul>
+                    <p class="font-medium text-gray-900">政府發言人呼籲市民密切留意最新天氣消息及政府公布，切勿鬆懈。</p>
+                `
+            },
+            'government': {
+                title: '政府跟進工作', // 根據要求內容對應此標題
+                time: '2025年9月2日 08:20',
+                content: `
+                    <p class="mb-4">八號熱帶氣旋警告信號現正生效，以下公共及商業服務已經暫停或作出特別安排：</p>
+                    <ul class="list-disc pl-5 space-y-2 mb-4">
+                        <li><span class="font-bold">政府服務：</span> 所有日間學校停課。政府轄下的診所、圖書館、體育場館及辦公室暫停開放。</li>
+                        <li><span class="font-bold">醫療服務：</span> 醫院管理局轄下所有普通科及專科門診診所、專職醫療及日間服務暫停。急症室則照常服務。</li>
+                    </ul>
+                    <p class="font-bold mb-1">交通服務：</p>
+                    <ul class="list-disc pl-5 space-y-2 mb-4">
+                        <li><span class="font-bold">港鐵：</span> 地面及高架路段服務（包括機場快綫）已暫停。地下路段維持約10分鐘一班車。</li>
+                        <li><span class="font-bold">巴士：</span> 所有日間巴士路線暫停服務。</li>
+                        <li><span class="font-bold">渡輪：</span> 全部渡輪航線已停航。</li>
+                    </ul>
+                    <ul class="list-disc pl-5 space-y-2 mb-4">
+                        <li><span class="font-bold">金融市場：</span> 證券市場及衍生產品市場全日暫停交易。</li>
+                    </ul>
+                    <p class="text-gray-500 text-sm mt-4">市民出門前，請先確認相關機構的最新公布。</p>
+                `
+            }
+        };
         
         let allTasks = {}; 
         let currentViewingTaskId = null; 
@@ -609,6 +688,18 @@
             } else {
                 console.error("Screen not found:", screenId);
             }
+        }
+        
+        // (新增) 顯示新聞詳情
+        function showNewsDetail(newsId) {
+            const news = newsData[newsId];
+            if (!news) return;
+            
+            document.getElementById('news-detail-title').innerText = news.title;
+            document.getElementById('news-detail-time').innerText = news.time;
+            document.getElementById('news-detail-content').innerHTML = news.content;
+            
+            showScreen('screen-news-detail');
         }
 
         function previewPhoto(event) {
